@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "../KD_tree/KD_tree_node.h"
-#include "../KD_tree/KD_tree_point.h"
 #include "../KD_tree/KD_tree.h"
-#include "../KD_tree//tuple.h"
 #include <string>
 #include <iostream>
 #include <functional>
@@ -62,7 +59,7 @@ namespace KD_treeTests
 	private:
 
 		std::default_random_engine random_engine;
-		KD_tree<3, std::string, Comparer_wrapper<std::less>, Type_wrapper<int, int, double>, false> tree;
+		KD_tree<3, std::string, Comparer_wrapper<std::less, std::less, std::less>, Type_wrapper<int, int, double>, false> tree;
 
 		typedef std::default_random_engine::result_type random_type;
 		typedef decltype(tree)::key_type key_type;
@@ -101,6 +98,20 @@ namespace KD_treeTests
 			Assert::IsTrue(res.size() == 1);
 			Assert::IsTrue(*(res[0].second) == "needle");
 			Assert::IsTrue(op_count < 100);
+		}
+
+		TEST_METHOD(erase_ShouldRemoveTheValueFromTheTree)
+		{
+			for (auto i = 0; i < 100000; ++i)
+			{
+				if (i == 50000)
+					tree[key_type(301, 501, 601)] = "needle";
+				tree.insert(std::string("hay") + std::to_string(i), random_engine() % 10001, random_engine() % 10001, random_engine() % 10001);
+			}
+
+			Assert::IsTrue(tree.contains(key_type(301, 501, 601)));
+			tree.erase(key_type(301, 501, 601));
+			Assert::IsFalse(tree.contains(key_type(301, 501, 601)));
 		}
 	};
 }
