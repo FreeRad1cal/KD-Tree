@@ -79,6 +79,7 @@ The `contains` method returns a boolean value that indicates whether the key exi
 
 #### KNN_search
 ```c++
+auto kd_tree = BK_KD_tree::KD_tree<3, std::string, BK_KD_tree::Comparer_wrapper<std::less, std::less, std::less>, BK_KD_tree::Type_wrapper<int, int, double>, false>();
 typedef decltype(kd_tree)::key_type key_type;
 std::default_random_engine random_engine;
 for (auto i = 0; i < 100000; ++i)
