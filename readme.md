@@ -16,7 +16,7 @@ The KD_tree class template is instantiated as follows:
 ```c++
 auto kd_tree = BK_KD_tree::KD_tree<3, std::string, BK_KD_tree::Comparer_wrapper<std::less, std::less, std::less>, BK_KD_tree::Type_wrapper<int, int, std::string>, false>();
 ```
-The first template parameter (`Dim`) specifies the number of dimensions for the search key - in this case 3. The second template parameter (`Mapped`) specifies the type of the mapped type - in this case `std::string`. The third template parameter (`PredWrapper`) specifies the predicate types that are to be used for each of the dimensions. These must be wrapped in the helper `BK_KD_tree::Comparer_wrapper` template. The fourth template parameter (`DimWrapper`) specifies the types for the dimensions. Likewise, these must be wrapped in the `BK_KD_tree::Type_wrapper` template. The number of arguments to `Comparer_wrapper` and `Type_wrapper` templates must match the number of dimensions. The only exception is when either all dimensions have the same type or use the same predicate, in which case the wrappers can be instantiated with only one argument. Lastly, the last template parameter (`Mfl`) specifies whether the tree should allow duplicate keys (currently not implemented).
+The first template parameter (`Dim`) specifies the number of dimensions for the search key - in this case `3`. The second template parameter (`Mapped`) specifies the type of the mapped type - in this case `std::string`. The third template parameter (`PredWrapper`) specifies the predicate types that are to be used for each of the dimensions. These must be wrapped in the helper `BK_KD_tree::Comparer_wrapper` template. The fourth template parameter (`DimWrapper`) specifies the types for the dimensions. Likewise, these must be wrapped in the `BK_KD_tree::Type_wrapper` template. The number of arguments to `Comparer_wrapper` and `Type_wrapper` templates must match the number of dimensions. The only exception is when all dimensions either have the same type or use the same predicate, in which case the wrappers can be instantiated with only one argument. Lastly, the last template parameter (`Mfl`) specifies whether the tree should allow duplicate keys (this functionality is currently not implemented).
 
 A set of default copy and move constructors and assignment operators are also provided.
 
@@ -24,7 +24,7 @@ The library offers the following basic set of operations:
 ``` 
 insert
 erase
-find
+operator[]
 at
 size
 clear
@@ -40,62 +40,91 @@ The first argument to `insert` is the mapped value, followed by the key coordina
 
 #### erase
 ```c++
-decltype(tree)::key_type key_type;
-auto value = kd_tree.erase(key_type(1, 2, "str_key"));
+decltype(kd_tree)::key_type key_type;
+auto result = kd_tree.erase(key_type(1, 2, "str_key"));
 ```
+The `erase` method returns the number of items deleted (`1` if succeeded, `0` if key does not exist).
 
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
+#### operator[]
+```c++
+decltype(kd_tree)::key_type key_type;
+auto value = kd_tree[key_type(1, 2, "str_key")];
 ```
-Give an example
+The index operator returns the current mapped value or inserts a default value.
+
+#### at
+```c++
+decltype(kd_tree)::key_type key_type;
+auto value = kd_tree[key_type(1, 2, "str_key")];
 ```
+The `at` method return the current mapped value or throws a `not_found` exception if the key does not exist.
 
-### And coding style tests
-
-Explain what these tests test and why
-
+#### size
+```c++
+kd_tree.size();
 ```
-Give an example
+The `size` method returns the number of nodes in the tree.
+
+#### clear
+```c++
+kd_tree.clear();
 ```
+The `clear` method recursively deletes all nodes of the tree. It is invoked by the KD_tree destructor.
 
-## Deployment
+#### contains
+```c++
+auto contains = kd_tree.contains(key_type(1, 2, "str_key"));
+```
+The `contains` method returns a boolean value that indicates whether the key exists.
 
-Add additional notes about how to deploy this on a live system
+#### KNN_search
+```c++
+typedef decltype(kd_tree)::key_type key_type;
+std::default_random_engine random_engine;
+for (auto i = 0; i < 100000; ++i)
+{
+    if (i == 50000)
+        tree[key_type(301, 501, 601)] = "needle";
+    tree.insert(std::string("hay") + std::to_string(i), random_engine() % 10001, random_engine() % 10001, random_engine() % 10001);
+}
 
-## Built With
+auto distanceCalculator = DistanceCalculator<key_type>();
+auto result = tree.KNN_search(1, distanceCalculator, key_type(300, 500, 600));
+```
+The `KNN_search` method takes three arguments: the number of nearest neighbors to evaluate, an object that computes the distance between two coordinates (keys), and the input coordinate. An example implementation of `DistanceCalculator` is as follows:
+```c++
+template<typename T>
+struct DistanceCalculator
+{
+public:
+    double get_cartesian_distance(const T &key1, const T &key2) const
+    {
+        ++_op_count;
+        return _get_cartesian_distance<T::dimension() - 1>(key1, key2);
+    }
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+    template<size_t N>
+    double get_distance_to_plane(const T &key1, const T &key2) const
+    {
+        return T::get<N>(key1) > T::get<N>(key2) ? T::get<N>(key1) - T::get<N>(key2) : T::get<N>(key2) - T::get<N>(key1);
+    }
 
-## Contributing
+private:
+    template<size_t N>
+    double _get_cartesian_distance(const T &key1, const T &key2) const
+    {
+        auto coord1 = T::get<N>(key1), coord2 = T::get<N>(key2);
+        double distance = coord1 > coord2 ? coord1 - coord2 : coord2 - coord1;
+        return (distance * distance) + _get_cartesian_distance<N - 1>(key1, key2);
+    }
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
+    template<>
+    double _get_cartesian_distance<0>(const T &key1, const T &key2) const
+    {
+        auto coord1 = T::get<0>(key1), coord2 = T::get<0>(key2);
+        double distance = coord1 > coord2 ? coord1 - coord2 : coord2 - coord1;
+        return (distance * distance);
+    }
+};
+```
+The `get_cartesian_distance` and `get_distance_to_plane` methods are required by KD_tree class.

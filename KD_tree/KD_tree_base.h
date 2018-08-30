@@ -51,8 +51,6 @@ namespace BK_KD_tree
 		value_type& insert(const value_type &value);
 		value_type& insert(value_type &&value);
 		size_t erase(const key_type &key);
-		value_type& find(const key_type &key) { return find_op<0>(m_root, key)->value(); }
-		const value_type& find(const key_type &key) const { return find_op<0>(m_root, key)->value(); }
 
 		bool empty() const { return m_root == nullptr; }
 		size_t size() const { return size_op(m_root); }
@@ -77,6 +75,9 @@ namespace BK_KD_tree
 		bool _compare_keys(const key_type &lhs, const key_type &rhs) const;
 		template<>
 		bool _compare_keys<Dim>(const key_type &lhs, const key_type &rhs) const { return true; }
+
+		value_type& find(const key_type &key) { return find_op<0>(m_root, key)->value(); }
+		const value_type& find(const key_type &key) const { return find_op<0>(m_root, key)->value(); }
 
 		//Swaps two nodes
 		void swap_nodes(node_pointer &a, node_pointer &b);

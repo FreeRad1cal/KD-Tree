@@ -206,6 +206,16 @@ namespace BK_KD_tree
 
 		static constexpr size_type Dimension = Dim;
 	};
+	
+//---------------------------------------------------------------------------------------------
+
+	template<typename T, typename U>
+	class DistanceCalculatorBase
+	{
+	public:
+		double get_cartesian_distance(const T &key1, const U &key2) const = 0;
+		double get_distance_to_plane(const T &key1, const T &key2) const = 0;
+	};
 
 //---------------------------------------------------------------------------------------------
 
@@ -388,7 +398,7 @@ namespace BK_KD_tree
 			return;
 
 		//compute the distance from the current point to the test point (key)
-		auto radius = distance.cartesian(tree_traits::val_to_key(current->value()), key);
+		auto radius = distance.get_cartesian_distance(tree_traits::val_to_key(current->value()), key);
 		//push the result to the bounded priority queue
 		q.push(KNN_type{ radius, &tree_traits::val_to_mapped(current->value()) });
 
@@ -399,7 +409,7 @@ namespace BK_KD_tree
 			KNN_search_op<next_dim<index>()>(current->right_child(), distance, key, q);
 
 		//once a leaf has been reached, compute the distance to the test point
-		auto dist_to_plane = distance.to_plane<index>(tree_traits::val_to_key(current->value()), key);
+		auto dist_to_plane = distance.get_distance_to_plane<index>(tree_traits::val_to_key(current->value()), key);
 		//if the distance is smaller than the current largest distance in the queue, or if the queue is not full
 		if (dist_to_plane < q.top().first || !q.full())
 		{
