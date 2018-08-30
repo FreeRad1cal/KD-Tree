@@ -84,8 +84,8 @@ std::default_random_engine random_engine;
 for (auto i = 0; i < 100000; ++i)
 {
     if (i == 50000)
-        tree[key_type(301, 501, 601)] = "needle";
-    tree.insert(std::string("hay") + std::to_string(i), random_engine() % 10001, random_engine() % 10001, random_engine() % 10001);
+        kd_tree[key_type(301, 501, 601)] = "needle";
+    kd_tree.insert(std::string("hay") + std::to_string(i), random_engine() % 10001, random_engine() % 10001, random_engine() % 10001);
 }
 
 auto distanceCalculator = DistanceCalculator<key_type>();
@@ -99,7 +99,6 @@ struct DistanceCalculator
 public:
     double get_cartesian_distance(const T &key1, const T &key2) const
     {
-        ++_op_count;
         return _get_cartesian_distance<T::dimension() - 1>(key1, key2);
     }
 
