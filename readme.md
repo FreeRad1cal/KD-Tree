@@ -92,7 +92,7 @@ for (auto i = 0; i < 100000; ++i)
 auto distanceCalculator = DistanceCalculator<key_type>();
 auto result = tree.KNN_search(1, distanceCalculator, key_type(300, 500, 600));
 ```
-The `KNN_search` method takes three arguments: the number of nearest neighbors to evaluate, an object that computes the distance between two coordinates (keys), and the input coordinate. The following ia an example implementation of `DistanceCalculator` that will work for types that define `operator-`:
+The `KNN_search` method takes three arguments: the number of nearest neighbors to evaluate, an object that computes the distance between two coordinates (keys), and the input coordinate. The method returns an `std::vector` of nearest neighbors where each result is a `BK_tuple::Tuple` with the cartesian distance of the input coordinate and the mapped value. The aforementioned `Tuple` class is similar in functionality to `std::Tuple` but created specifically for this project. The following ia an example implementation of `DistanceCalculator` that will work for types that define `operator-`:
 ```c++
 template<typename T>
 struct DistanceCalculator
