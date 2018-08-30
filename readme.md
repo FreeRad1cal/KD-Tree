@@ -92,7 +92,7 @@ for (auto i = 0; i < 100000; ++i)
 auto distanceCalculator = DistanceCalculator<key_type>();
 auto result = tree.KNN_search(1, distanceCalculator, key_type(300, 500, 600));
 ```
-The `KNN_search` method takes three arguments: the number of nearest neighbors to evaluate, an object that computes the distance between two coordinates (keys), and the input coordinate. An example implementation of `DistanceCalculator` is as follows:
+The `KNN_search` method takes three arguments: the number of nearest neighbors to evaluate, an object that computes the distance between two coordinates (keys), and the input coordinate. The following ia an example implementation of `DistanceCalculator` that will work for types with defined `operator-`:
 ```c++
 template<typename T>
 struct DistanceCalculator
