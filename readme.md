@@ -1,10 +1,6 @@
 # A heterogeneously typed KD-Tree implemented in C++
 
-What makes this KD-Tree library different? It allows the use of different object types for the dimensions of the search key. Further, it allows the user to supply an arbitrary comparer for each dimension of the key. The additional flexibility makes this library useful for nonconventional applications of the KNN search.
-
-## Getting Started
-
-The library was written in Visual C++ with Visual Studio, but you should have no problem using it on other platforms.
+This KD-Tree library allows the use of different object types and arbitrary comparers for each dimension of the search key. The additional flexibility makes this library useful for nonconventional applications of the KNN search.
 
 ## Using the library
 
